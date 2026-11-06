@@ -15,6 +15,7 @@ on:
   push:
     paths:
       - 'ios/**'
+      - '!ios/**/*.md'
       - '.github/workflows/ios.yml'
 
 jobs:
