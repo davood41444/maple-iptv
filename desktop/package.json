@@ -1,0 +1,60 @@
+{
+  "name": "maple-iptv",
+  "productName": "Maple IPTV",
+  "version": "1.1.3",
+  "description": "Maple IPTV for Windows and Mac",
+  "author": "Maple Online Solutions <info@mapleonlinesolutions.com>",
+  "homepage": "https://mapleonlinesolutions.com",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis",
+    "dist:mac": "electron-builder --mac dmg"
+  },
+  "build": {
+    "appId": "com.mapleonlinesolutions.iptv",
+    "productName": "Maple IPTV",
+    "copyright": "© Maple Online Solutions",
+    "directories": {
+      "output": "../dist/desktop",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "server.js",
+      "subtitles.js",
+      "downloads.js",
+      "vendor/**",
+      "build/icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "../web",
+        "to": "web"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "shortcutName": "Maple IPTV",
+      "artifactName": "MapleIPTV-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "identity": null,
+      "category": "public.app-category.entertainment",
+      "icon": "build/icon.png",
+      "artifactName": "MapleIPTV-${version}.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.1.0",
+    "electron-builder": "^26.18.0"
+  }
+}

@@ -1,0 +1,68 @@
+# Builds Maple IPTV for iPhone/iPad on a GitHub Mac (no Mac needed here). See ios/README.md.
+#   - always: an unsigned .ipa (for AltStore/Sideloadly with a free Apple ID), as an artifact
+#   - with "testflight" ticked and the App Store Connect secrets set: a signed build uploaded to TestFlight
+name: iPhone app
+
+on:
+  workflow_dispatch:
+    inputs:
+      testflight:
+        description: Upload a signed build to TestFlight (needs the App Store secrets)
+        type: boolean
+        default: false
+  # Automatically only when the iPhone code changes: a free account's Mac minutes are limited
+  # (about 200 a month for private projects). Interface changes: run it by hand for a release.
+  push:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios.yml'
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode project
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          pod install
+
+      - name: Build (unsigned)
+        working-directory: ios
+        run: |
+          xcodebuild -workspace MapleIPTV.xcworkspace -scheme MapleIPTV -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/MapleIPTV.app Payload/
+          zip -qry MapleIPTV-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MapleIPTV-iPhone-unsigned
+          path: ios/MapleIPTV-unsigned.ipa
+
+      # Signed build for TestFlight / the App Store. Xcode creates the certificate and profile
+      # itself with the App Store Connect API key ("cloud-managed signing").
+      - name: TestFlight
+        if: ${{ inputs.testflight }}
+        working-directory: ios
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          test -n "$ASC_KEY_ID" -a -n "$ASC_ISSUER_ID" -a -n "$ASC_KEY_P8" -a -n "$TEAM_ID" || { echo "App Store secrets are not set (see ios/README.md)"; exit 1; }
+          echo "$ASC_KEY_P8" > "$RUNNER_TEMP/key.p8"
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $RUNNER_TEMP/key.p8 -authenticationKeyID $ASC_KEY_ID -authenticationKeyIssuerID $ASC_ISSUER_ID"
+          xcodebuild -workspace MapleIPTV.xcworkspace -scheme MapleIPTV -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/MapleIPTV.xcarchive \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} DEVELOPMENT_TEAM=$TEAM_ID $AUTH archive
+          sed "s/TEAM_ID/$TEAM_ID/" ExportOptions.plist > "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild -exportArchive -archivePath build/MapleIPTV.xcarchive \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath build/export $AUTH

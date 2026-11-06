@@ -1,0 +1,13 @@
+build/
+node_modules/
+# Coupon signing key and the plain-text codes: private.
+tools/coupons/
+# Built apps (large; they go to the website, not into the repository).
+dist/
+site/public/maple-iptv/files/
+# This computer's settings and caches.
+android/local.properties
+android/.gradle/
+.wrangler/
+.dev.vars
+.claude/

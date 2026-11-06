@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: back up only the trial start date, never playlists or logins. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="sharedpref" path="premium.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="sharedpref" path="premium.xml" />
+    </device-transfer>
+</data-extraction-rules>

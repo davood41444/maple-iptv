@@ -1,0 +1,60 @@
+# Maple IPTV for iPhone and iPad. The Xcode project is generated from this file:
+#   xcodegen generate && pod install     (then open MapleIPTV.xcworkspace)
+# The cloud build (.github/workflows/ios.yml) does the same on a Mac. See README.md.
+name: MapleIPTV
+options:
+  bundleIdPrefix: com.mapleonlinesolutions
+  deploymentTarget:
+    iOS: "15.0"
+settings:
+  base:
+    MARKETING_VERSION: "1.1.3"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+targets:
+  MapleIPTV:
+    type: application
+    platform: iOS
+    # A shared scheme, so xcodebuild in the cloud build can find it.
+    scheme: {}
+    sources:
+      - path: MapleIPTV
+      # The shared interface, copied into the app as the folder "web".
+      - path: ../web
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mapleonlinesolutions.iptv
+        PRODUCT_NAME: MapleIPTV
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    info:
+      path: MapleIPTV/Info.plist
+      properties:
+        CFBundleDisplayName: Maple IPTV
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UIViewControllerBasedStatusBarAppearance: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
+        # IPTV servers (playlists, channel logos) are mostly plain http, at addresses the user enters.
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        ITSAppUsesNonExemptEncryption: false
