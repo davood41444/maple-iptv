@@ -29,6 +29,7 @@ Installation tips are on the [release page](https://github.com/davood41444/maple
 - **Audio and subtitles:** choose the audio track and subtitles, and set the subtitle size, color and font
 - **Downloads:** save movies and episodes on Windows, Mac and Linux and watch them offline
 - **Parental PIN:** lock adult categories
+- **Automatic updates:** the app tells you when a new version is ready and installs it
 - **7 languages:** English, Persian, French, Spanish, Arabic, Chinese and Turkish
 
 <p><img src="docs/screenshots/live.jpg" width="49%" alt="Live TV"> <img src="docs/screenshots/movies.jpg" width="49%" alt="Movies"></p>

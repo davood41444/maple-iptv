@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var proxy: HttpProxy
     private lateinit var phoneServer: PhoneServer
     private lateinit var billing: Billing
+    private lateinit var updater: Updater
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +80,7 @@ class MainActivity : ComponentActivity() {
         proxy = HttpProxy(http)
         phoneServer = PhoneServer { fields -> sendToPage(JSONObject().put("type", "phone").put("data", fields)) }
         billing = Billing(this, ::sendToPage)
+        updater = Updater(this, http, ::sendToPage)
         setUpWebView()
         webView.requestFocus()
     }
@@ -277,6 +279,13 @@ class MainActivity : ComponentActivity() {
 
         @JavascriptInterface
         fun exitApp() = runOnUiThread { finish() }
+
+        /** In-app update (web/js/update.js): download, check and open Android's installer. */
+        @JavascriptInterface
+        fun installUpdate(url: String, sha256: String) = updater.install(url, sha256)
+
+        @JavascriptInterface
+        fun installedFromStore(): Boolean = updater.installedFromStore()
 
         @JavascriptInterface
         fun appVersion(): String = packageManager.getPackageInfo(packageName, 0).versionName ?: ""

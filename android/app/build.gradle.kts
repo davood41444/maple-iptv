@@ -1,5 +1,14 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
+}
+
+// The release signing key: android/signing/ (not in the repository; keep a backup of it).
+// Every update must be signed with the same key, or Android refuses to install it.
+val signing = Properties().apply {
+    val file = rootProject.file("signing/signing.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
@@ -10,13 +19,25 @@ android {
         applicationId = "com.mapleonlinesolutions.iptv"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.2.0"
+        versionCode = 7
+        versionName = "1.2.1"
+    }
+
+    signingConfigs {
+        if (signing.getProperty("storeFile") != null) {
+            create("release") {
+                storeFile = rootProject.file("signing/" + signing.getProperty("storeFile"))
+                storePassword = signing.getProperty("password")
+                keyAlias = signing.getProperty("alias")
+                keyPassword = signing.getProperty("password")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 

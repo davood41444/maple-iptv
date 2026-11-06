@@ -122,6 +122,12 @@
             App.report.send();
           },
         },
+        App.update.supported() && {
+          key: 'update',
+          label: t('update.check'),
+          value: () => App.update.available ? t('update.newVersion', { v: App.localDigits(App.update.available.version) }) : '',
+          action: () => App.update.check(true),
+        },
         {
           key: 'about',
           label: t('settings.about'),

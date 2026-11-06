@@ -100,6 +100,8 @@
       App.events.emit('phone', event.data);
     } else if (event.type === 'billing') {
       App.events.emit('billing', event);
+    } else if (event.type === 'update') {
+      App.events.emit('update-progress', event);
     }
   };
 })();

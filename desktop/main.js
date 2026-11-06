@@ -1,11 +1,12 @@
 /*
- * Maple IPTV for Windows and Mac: the shared web/ interface in an Electron
+ * Maple IPTV for Windows, Mac and Linux: the shared web/ interface in an Electron
  * window, served by server.js. The page talks to this side through preload.js
  * (window.DesktopHost).
  *
  *   npm start                      run from the source tree
  *   MAPLE_USER_DATA=<dir> npm start   with separate saved data (for testing)
  *   MAPLE_DOWNLOADS=<dir>             and a separate default download folder
+ *   MAPLE_TEST_VERSION=1.0.0          report an older version (to test in-app updates, see updater.js)
  */
 'use strict';
 const { app, BrowserWindow, dialog, ipcMain, shell, session } = require('electron');
@@ -13,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { startServer } = require('./server');
 const { Downloads } = require('./downloads');
+const updater = require('./updater');
 
 const WEB_ROOT = app.isPackaged ? path.join(process.resourcesPath, 'web') : path.join(__dirname, '..', 'web');
 const VENDOR_ROOT = path.join(__dirname, 'vendor');
@@ -74,10 +76,16 @@ function createWindow(address) {
   win.loadURL(address);
 }
 
-ipcMain.on('version', event => { event.returnValue = app.getVersion(); });
+ipcMain.on('version', event => { event.returnValue = process.env.MAPLE_TEST_VERSION || app.getVersion(); });
 ipcMain.on('is-fullscreen', event => { event.returnValue = !!win && win.isFullScreen(); });
 ipcMain.on('fullscreen', (event, on) => { if (win) win.setFullScreen(!!on); });
 ipcMain.on('quit', () => app.quit());
+
+ipcMain.on('update:kind', event => { event.returnValue = updater.kind(); });
+ipcMain.handle('update:download', (event, url, sha256) =>
+  updater.download(url, sha256, percent => event.sender.send('update:progress', percent)));
+ipcMain.handle('update:install', () => updater.install());
+ipcMain.handle('update:open', (event, url) => updater.open(url));
 
 // Downloads (downloads.js); finished files are served to the page as /downloads/<id>.<ext>.
 let downloads = null;

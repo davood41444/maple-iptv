@@ -24,7 +24,11 @@ cd android
 ./gradlew assembleDebug
 ```
 
-The file is `android/app/build/outputs/apk/debug/app-debug.apk`. To install it on a TV over the network, turn on Developer options and USB (or wireless) debugging on the TV, then run:
+The file is `android/app/build/outputs/apk/debug/app-debug.apk`. For a release, `./gradlew assembleRelease` signs `app-release.apk` with the key in `android/signing/`.
+
+**The signing key:** `android/signing/` is not in the repository. Keep a backup of it: Android installs an update only if it is signed with the same key.
+
+To install it on a TV over the network, turn on Developer options and USB (or wireless) debugging on the TV, then run:
 
 ```bash
 adb connect <tv-ip>:5555
@@ -83,9 +87,25 @@ To ship through TestFlight and the App Store you need an Apple Developer account
    ```
 
    The **Release** workflow creates the GitHub release. It builds the Windows, Mac and Linux apps, starts each one once to check it opens, and attaches them.
-3. **Attach the Android file:** build `app-debug.apk` and add it to the release as `MapleIPTV.apk`.
+3. **Attach the Android file:** build `app-release.apk` and add it to the release as `MapleIPTV.apk`.
 
 The website's download buttons always point to the latest release.
+
+## In-app updates
+
+About once a day the apps ask GitHub for the latest release (`web/js/update.js`), and offer to update when it is newer:
+
+| Platform | What happens |
+|---|---|
+| Android | Downloads the APK and opens Android's installer (`Updater.kt`) |
+| Windows | Downloads the installer, which installs quietly and restarts the app (`desktop/updater.js`) |
+| Linux AppImage | Replaces itself and restarts |
+| Linux .deb | Opens the download in the browser |
+| Mac | Downloads the .dmg and opens it |
+
+The release file names must stay the same, and every download is checked against the SHA-256 that GitHub lists.
+
+For a Google Play build, remove the `REQUEST_INSTALL_PACKAGES` permission: Google Play updates the app itself. Apps installed from Google Play don't check for updates.
 
 ## Free mode
 

@@ -56,6 +56,11 @@ jobs:
         run: |
           (cd desktop && npx electron-builder --win nsis)
           node tools/smoke-desktop.js "dist/desktop/win-unpacked/Maple IPTV.exe"
+          # An in-app update runs the installer like this: it must install quietly and start the app.
+          MSYS_NO_PATHCONV=1 ./dist/desktop/MapleIPTV-Setup.exe --updated /S --force-run
+          for i in $(seq 1 30); do tasklist | grep -q "Maple IPTV.exe" && break; sleep 2; done
+          tasklist | grep "Maple IPTV.exe"
+          taskkill //IM "Maple IPTV.exe" //F //T || true
           echo "FILES=dist/desktop/MapleIPTV-Setup.exe" >> "$GITHUB_ENV"
 
       # One app for Apple Silicon and Intel, signed "ad hoc" (no Apple developer account yet),

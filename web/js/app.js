@@ -242,6 +242,7 @@
     App.player.init();
     App.premium.init();
     App.report.start();
+    App.update.start();
 
     const sources = App.sourcesStore.all();
     const active = sources.find(s => s.id === App.settings.get('activeSource')) || sources[0];

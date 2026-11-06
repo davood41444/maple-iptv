@@ -14,10 +14,14 @@
   // this marks where Apple's rules differ (purchases through the App Store only).
   App.ios = !!window.MapleIos;
 
-  // Tiny event bus: App.events.on('lang', fn); App.events.emit('lang', 'fa')
+  // Tiny event bus: App.events.on('lang', fn); App.events.emit('lang', 'fa').
+  // on() returns a function that removes the handler again.
   const handlers = {};
   App.events = {
-    on(name, fn) { (handlers[name] = handlers[name] || []).push(fn); },
+    on(name, fn) {
+      (handlers[name] = handlers[name] || []).push(fn);
+      return () => { handlers[name] = handlers[name].filter(f => f !== fn); };
+    },
     emit(name, data) { (handlers[name] || []).forEach(fn => fn(data)); },
   };
 

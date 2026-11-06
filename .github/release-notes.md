@@ -15,6 +15,8 @@
 - **Linux AppImage:** make the file executable and run it. If it doesn't start, install `libfuse2`.
 - **Ubuntu and Debian:** `sudo apt install ./MapleIPTV-Linux.deb`
 
+**Updates:** the app tells you when a new version is ready and updates itself (on Android, tap Install when Android asks). On Android, if you have version 1.2.0 or older, uninstall it once before installing this one.
+
 Maple IPTV is a player and doesn't include any channels. You need a playlist from your IPTV provider: an Xtream Codes login or an M3U link.
 
 Website: https://mapleonlinesolutions.com/maple-iptv

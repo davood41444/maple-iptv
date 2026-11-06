@@ -24,4 +24,17 @@ contextBridge.exposeInMainWorld('DesktopHost', {
     chooseFolder: () => ipcRenderer.invoke('dl:choose-folder'),
     onChange: fn => ipcRenderer.on('downloads', (event, state) => fn(state)),
   },
+
+  // In-app updates (desktop/updater.js; web/js/update.js decides when and asks).
+  update: {
+    kind: () => ipcRenderer.sendSync('update:kind'),
+    download: (url, sha256, onProgress) => {
+      const listener = (event, percent) => onProgress(percent);
+      ipcRenderer.on('update:progress', listener);
+      return ipcRenderer.invoke('update:download', url, sha256)
+        .finally(() => ipcRenderer.removeListener('update:progress', listener));
+    },
+    install: () => ipcRenderer.invoke('update:install'),
+    open: url => ipcRenderer.invoke('update:open', url),
+  },
 });

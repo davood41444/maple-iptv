@@ -1,7 +1,7 @@
 {
   "name": "maple-iptv",
   "productName": "Maple IPTV",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Maple IPTV for Windows, Mac and Linux",
   "author": "Maple Online Solutions <info@mapleonlinesolutions.com>",
   "homepage": "https://mapleonlinesolutions.com",
@@ -27,6 +27,7 @@
       "server.js",
       "subtitles.js",
       "downloads.js",
+      "updater.js",
       "vendor/**",
       "build/icon.png"
     ],
