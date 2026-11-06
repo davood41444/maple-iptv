@@ -41,6 +41,25 @@ jobs:
           cp -R build/Build/Products/Release-iphoneos/MapleIPTV.app Payload/
           zip -qry MapleIPTV-unsigned.ipa Payload
 
+      # Nothing here runs the app, so check what a launch needs: the interface files, every
+      # framework the app loads at start, and the VLC player.
+      - name: Check the app
+        working-directory: ios
+        run: |
+          APP=Payload/MapleIPTV.app
+          du -sh "$APP" MapleIPTV-unsigned.ipa
+          ls "$APP" "$APP/Frameworks" 2>/dev/null || true
+          plutil -p "$APP/Info.plist" | grep -E '"CFBundle(Identifier|ShortVersionString|Version)"'
+          lipo -info "$APP/MapleIPTV"
+          otool -L "$APP/MapleIPTV"
+          test -f "$APP/web/index.html" || { echo "::error::web/index.html is not in the app"; exit 1; }
+          for lib in $(otool -L "$APP/MapleIPTV" | awk 'NR>1 && $1 ~ /^@rpath\// {print $1}'); do
+            test -e "$APP/Frameworks/${lib#@rpath/}" || { echo "::error::$lib is not in the app"; exit 1; }
+          done
+          if test -d "$APP/Frameworks/MobileVLCKit.framework"; then echo "VLC: embedded framework"
+          elif strings "$APP/MapleIPTV" | grep -q VLCMediaPlayer; then echo "VLC: linked into the app"
+          else echo "::error::the VLC player is not in the app"; exit 1; fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: MapleIPTV-iPhone-unsigned
