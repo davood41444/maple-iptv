@@ -1,0 +1,88 @@
+# Builds the Windows, Mac and Linux apps and attaches them to a GitHub release.
+# Start it by pushing a version tag (git tag v1.2.0 && git push origin v1.2.0), or by hand
+# (Actions → Release → Run workflow). Each app is started once to check that it opens.
+# The Android .apk is built and attached separately (see docs/BUILDING.md).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, e.g. v1.2.0
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+  GH_TOKEN: ${{ github.token }}
+  CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create the release
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 ||
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "Maple IPTV ${TAG#v}" --notes-file .github/release-notes.md
+
+  desktop:
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: desktop
+
+      - name: Windows
+        if: runner.os == 'Windows'
+        run: |
+          (cd desktop && npx electron-builder --win nsis)
+          node tools/smoke-desktop.js "dist/desktop/win-unpacked/Maple IPTV.exe"
+          echo "FILES=dist/desktop/MapleIPTV-Setup.exe" >> "$GITHUB_ENV"
+
+      # One app for Apple Silicon and Intel, signed "ad hoc" (no Apple developer account yet),
+      # in a .dmg with a shortcut to Applications.
+      - name: Mac
+        if: runner.os == 'macOS'
+        run: |
+          (cd desktop && npx electron-builder --mac dir --universal)
+          APP="dist/desktop/mac-universal/Maple IPTV.app"
+          codesign --force --deep --sign - "$APP"
+          node tools/smoke-desktop.js "$APP/Contents/MacOS/Maple IPTV"
+          mkdir dmg && cp -R "$APP" dmg/ && ln -s /Applications dmg/Applications
+          hdiutil create -volname "Maple IPTV" -srcfolder dmg -ov -format UDZO dist/desktop/MapleIPTV-Mac.dmg
+          echo "FILES=dist/desktop/MapleIPTV-Mac.dmg" >> "$GITHUB_ENV"
+
+      # The AppImage is tested as a user starts it; the .deb is installed and started.
+      - name: Linux
+        if: runner.os == 'Linux'
+        run: |
+          (cd desktop && npm run dist:linux)
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libfuse2t64
+          sysctl kernel.apparmor_restrict_unprivileged_userns || true
+          chmod +x dist/desktop/MapleIPTV-Linux.AppImage
+          xvfb-run -a node tools/smoke-desktop.js dist/desktop/MapleIPTV-Linux.AppImage
+          sudo apt-get install -y -qq ./dist/desktop/MapleIPTV-Linux.deb
+          xvfb-run -a node tools/smoke-desktop.js maple-iptv
+          echo "FILES=dist/desktop/MapleIPTV-Linux.AppImage dist/desktop/MapleIPTV-Linux.deb" >> "$GITHUB_ENV"
+
+      - name: Attach to the release
+        run: gh release upload "$TAG" $FILES --clobber

@@ -1,16 +1,19 @@
 /*
  * Premium: a 7-day free trial, then a Google Play subscription (monthly or
  * yearly), a subscription bought on the website (an MPL-XXXX-XXXX-XXXX code,
- * checked with site/src/api.js) or a code from tools/coupons.js. Without
+ * checked by the website) or a code from tools/coupons.js. Without
  * Premium only the first FREE_CHANNELS live channels play; movies and series
  * need Premium.
  *
- * The Samsung (Tizen) build has no store billing yet, so it is unrestricted.
+ * FREE: for now the app is free and unrestricted on every platform; the trial,
+ * Premium screen and purchases come back when it is set to false. The Samsung
+ * (Tizen) build has no store billing, so it stays unrestricted either way.
  */
 (function () {
   'use strict';
   const App = window.App;
   const DAY = 86400000;
+  const FREE = true;
   const TRIAL_DAYS = 7;
   const FREE_CHANNELS = 10;
   const SITE = 'https://mapleonlinesolutions.com/maple-iptv';
@@ -98,7 +101,7 @@
     billing: 'loading', // 'loading' | 'ready' | 'unavailable'
 
     init() {
-      if (App.platform === 'tizen') {
+      if (FREE || App.platform === 'tizen') {
         this.unlimited = true;
         return;
       }

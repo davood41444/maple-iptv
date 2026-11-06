@@ -1,5 +1,5 @@
 /*
- * Takes the website's app screenshots (site/public/maple-iptv/assets/shots/*.jpg)
+ * Takes the app screenshots for the GitHub page and the website (docs/screenshots/*.jpg)
  * with the demo playlist's made-up names, at TV size (1920x1080):
  *
  *   desktop\node_modules\electron\dist\electron.exe tools/site-shots.js
@@ -14,7 +14,7 @@ process.env.PORT = '8090';
 require('./dev-server'); // serves web/ and the demo playlist
 
 const BASE = 'http://localhost:8090/';
-const OUT = path.join(__dirname, '..', 'site', 'public', 'maple-iptv', 'assets', 'shots');
+const OUT = path.join(__dirname, '..', 'docs', 'screenshots');
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 app.whenReady().then(async () => {
@@ -39,7 +39,7 @@ app.whenReady().then(async () => {
   await run(`localStorage.clear();
     localStorage.setItem('homeiptv.sources', JSON.stringify([{ id: 'demo', type: 'xtream', name: 'Maple Demo', format: 'hls',
       server: '${BASE}demo', username: 'demo', password: 'demo' }]));
-    localStorage.setItem('homeiptv.settings', JSON.stringify({ activeSource: 'demo', resumeLast: false, lang: 'en' }));`);
+    localStorage.setItem('homeiptv.settings', JSON.stringify({ activeSource: 'demo', resumeLast: false, lang: 'en', reporting: false }));`);
   await page.loadURL(BASE);
   await wait(7000);
   await shot('home');

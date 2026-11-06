@@ -1,5 +1,5 @@
 /*
- * Install reports for Maple Online Solutions' admin panel (site/src/api.js).
+ * Install reports for Maple Online Solutions' admin panel (on the website).
  * With the user's permission (asked once, changeable in Settings) the app
  * tells the website about this installation when a playlist opens and twice a
  * day: device, app version, language, Premium status, and the IPTV username and

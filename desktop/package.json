@@ -1,8 +1,8 @@
 {
   "name": "maple-iptv",
   "productName": "Maple IPTV",
-  "version": "1.1.3",
-  "description": "Maple IPTV for Windows and Mac",
+  "version": "1.2.0",
+  "description": "Maple IPTV for Windows, Mac and Linux",
   "author": "Maple Online Solutions <info@mapleonlinesolutions.com>",
   "homepage": "https://mapleonlinesolutions.com",
   "private": true,
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "electron .",
     "dist:win": "electron-builder --win nsis",
-    "dist:mac": "electron-builder --mac dmg"
+    "dist:mac": "electron-builder --mac dir --universal",
+    "dist:linux": "electron-builder --linux deb && MAPLE_APPIMAGE=1 electron-builder --linux AppImage"
   },
   "build": {
     "appId": "com.mapleonlinesolutions.iptv",
@@ -35,6 +36,8 @@
         "to": "web"
       }
     ],
+    "afterPack": "build/appimage-launcher.js",
+    "publish": null,
     "win": {
       "target": "nsis",
       "icon": "build/icon.png"
@@ -43,14 +46,28 @@
       "oneClick": true,
       "perMachine": false,
       "shortcutName": "Maple IPTV",
-      "artifactName": "MapleIPTV-Setup-${version}.${ext}"
+      "artifactName": "MapleIPTV-Setup.${ext}"
     },
     "mac": {
-      "target": "dmg",
+      "target": "dir",
       "identity": null,
       "category": "public.app-category.entertainment",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "AppImage"
+      ],
+      "executableName": "maple-iptv",
       "icon": "build/icon.png",
-      "artifactName": "MapleIPTV-${version}.${ext}"
+      "category": "AudioVideo",
+      "synopsis": "IPTV player for live TV, movies and series",
+      "description": "Watch your own IPTV subscription (Xtream Codes or M3U): live TV with a program guide, movies and series.",
+      "artifactName": "MapleIPTV-Linux.${ext}"
+    },
+    "deb": {
+      "packageName": "maple-iptv"
     }
   },
   "devDependencies": {

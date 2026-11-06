@@ -1,13 +1,19 @@
+# Build output (the desktop app's build/ folder holds its icon and build scripts, so it stays).
 build/
+!desktop/build/
 node_modules/
 # Coupon signing key and the plain-text codes: private.
 tools/coupons/
-# Built apps (large; they go to the website, not into the repository).
+# Built apps (large; they go to GitHub releases, not into the repository).
 dist/
-site/public/maple-iptv/files/
 # This computer's settings and caches.
 android/local.properties
 android/.gradle/
 .wrangler/
 .dev.vars
 .claude/
+
+# Kept on this computer only (not in the public project)
+site/
+WEBSITE.md
+docs/GITHUB.md

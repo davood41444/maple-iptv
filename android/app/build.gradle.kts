@@ -10,8 +10,8 @@ android {
         applicationId = "com.mapleonlinesolutions.iptv"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.1.3"
+        versionCode = 6
+        versionName = "1.2.0"
     }
 
     buildTypes {
