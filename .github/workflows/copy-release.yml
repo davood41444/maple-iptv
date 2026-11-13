@@ -1,0 +1,39 @@
+# Copies a published release, files and notes unchanged, from another public repository into this
+# one. Used once, when the code moved to its own repository. Run it by hand: Actions → Copy a
+# release → Run workflow.
+name: Copy a release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, e.g. v1.4.2
+        required: true
+      source:
+        description: Repository the release comes from
+        required: true
+        default: davood41444/maple-iptv-app
+
+permissions:
+  contents: write
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+      SOURCE: ${{ inputs.source }}
+    steps:
+      - name: Download the release
+        run: |
+          mkdir files
+          gh release download "$TAG" --repo "$SOURCE" --dir files
+          gh release view "$TAG" --repo "$SOURCE" --json body --jq .body > notes.md
+          echo "TITLE=$(gh release view "$TAG" --repo "$SOURCE" --json name --jq .name)" >> "$GITHUB_ENV"
+          ls -l files
+          sha256sum files/*
+      - name: Publish it here
+        run: |
+          gh release create "$TAG" files/* --repo "$GITHUB_REPOSITORY" --target main --latest \
+            --title "$TITLE" --notes-file notes.md
