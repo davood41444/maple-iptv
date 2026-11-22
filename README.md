@@ -29,7 +29,7 @@ Step-by-step instructions for every device: [install guide](https://mapleonlines
 - **TV guide:** every channel's programs on a timeline, and catch-up of past programs when your provider records them
 - **Movies and series:** posters, plot, rating and cast, seasons and episodes, and continue watching
 - **Audio and subtitles:** choose the audio track and subtitles, and set the subtitle size, color and font
-- **Downloads:** save movies and episodes on Windows, Mac and Linux and watch them offline
+- **Downloads:** save movies and episodes on Windows, Mac, Linux and Android phones and tablets, and watch them offline
 - **Profiles:** each person's own favorites and history, and kids profiles without adult categories
 - **Backup codes:** move your playlists and settings to another device with a short code
 - **Parental PIN:** lock adult categories
